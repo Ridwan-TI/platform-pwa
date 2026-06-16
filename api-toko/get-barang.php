@@ -1,27 +1,62 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
-// 1. Panggil kunci gudang (koneksi)
-require_once __DIR__ . '/koneksi.php';
 
-// 2. Buat perintah SQL (Minta data ke gudang)
-$query = "SELECT * FROM barang ORDER BY ID DESC";
-$hasil = mysqli_query($koneksi, $query);
-
-// 3. Siapkan keranjang kosong untuk menampung data
-$data_barang = array();
-
-// 4. Masukkan data dari gudang ke keranjang satu per satu
-while ($baris = mysqli_fetch_assoc($hasil)) {
-    $data_barang[] = $baris;
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
 }
 
-// 5. Buat format bungkusan paket (Response API)
-$response = [
+require_once __DIR__ . '/koneksi.php';
+
+// ==========================
+// VALIDASI TOKEN
+// ==========================
+$headers       = getallheaders();
+$token_dikirim = trim($headers['Authorization'] ?? $headers['authorization'] ?? '');
+
+if ($token_dikirim === '') {
+    echo json_encode([
+        "status" => "error",
+        "pesan"  => "Token tidak ditemukan"
+    ]);
+    exit();
+}
+
+$token_aman = mysqli_real_escape_string($koneksi, $token_dikirim);
+$cek_token  = mysqli_query($koneksi, "SELECT id FROM users WHERE token='$token_aman' LIMIT 1");
+
+if (mysqli_num_rows($cek_token) === 0) {
+    echo json_encode([
+        "status" => "error",
+        "pesan"  => "Akses Ditolak! Token Invalid."
+    ]);
+    exit();
+}
+
+// ==========================
+// AMBIL DATA BARANG
+// ==========================
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    echo json_encode([
+        "status" => "error",
+        "pesan"  => "Method tidak diizinkan"
+    ]);
+    exit();
+}
+
+$query  = mysqli_query($koneksi, "SELECT * FROM barang ORDER BY ID DESC");
+$data   = [];
+
+while ($baris = mysqli_fetch_assoc($query)) {
+    $data[] = $baris;
+}
+
+echo json_encode([
     "status"  => "success",
     "message" => "Berhasil mengambil data",
-    "data"    => $data_barang
-];
-
-// 6. Olah dan tampilkan paket sebagai JSON!
-echo json_encode($response);
+    "data"    => $data
+]);
 ?>

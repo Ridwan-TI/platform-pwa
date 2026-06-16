@@ -8,18 +8,19 @@ if (!myToken) {
 
 document.addEventListener("DOMContentLoaded", function () {
   let semuaData = [];
-  let modeEdit = false; // flag untuk mengetahui apakah sedang dalam mode edit
+  let modeEdit = false;
 
+  const URL_GET    = "http://localhost/toko-app-main/api-toko/get-barang.php";   // ← BARU
   const URL_TAMBAH = "http://localhost/toko-app-main/api-toko/tambah_barang.php";
-  const URL_HAPUS = "http://localhost/toko-app-main/api-toko/hapus_barang.php";
-  const URL_EDIT = "http://localhost/toko-app-main/api-toko/edit_barang.php";
+  const URL_HAPUS  = "http://localhost/toko-app-main/api-toko/hapus_barang.php";
+  const URL_EDIT   = "http://localhost/toko-app-main/api-toko/edit_barang.php";
 
   // =========================
   // AMBIL DATA (GET)
   // =========================
   async function ambilDataBarang() {
     try {
-      const response = await fetch(URL_TAMBAH, {
+      const response = await fetch(URL_GET, {  // ← DIPERBAIKI: pakai URL_GET bukan URL_TAMBAH
         method: "GET",
         headers: {
           Authorization: myToken,
@@ -49,31 +50,35 @@ document.addEventListener("DOMContentLoaded", function () {
     let barisHTML = "";
 
     data.forEach((barang) => {
+      // URL gambar — fallback jika tidak ada
+      let urlGambar = barang.gambar
+        ? `http://localhost/toko-app-main/api-toko/uploads/${barang.gambar}`
+        : `https://via.placeholder.com/50?text=No+Img`;
+
       barisHTML += `
-                <tr class="text-center hover:bg-gray-50 transition">
-                    <td class="px-6 py-3">${barang.ID}</td>
-                    <td class="px-6 py-3">${barang.nama_barang}</td>
-                    <td class="px-6 py-3">
-                        Rp ${Number(barang.harga).toLocaleString("id-ID")}
-                    </td>
-                    <td class="px-6 py-3 flex justify-center gap-2">
-                        <!-- TOMBOL EDIT -->
-                        <button
-                            onclick="isiFormEdit('${barang.ID}', '${barang.nama_barang}', '${barang.harga}')"
-                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-semibold transition"
-                        >
-                            ✏️ Edit
-                        </button>
-                        <!-- TOMBOL HAPUS -->
-                        <button
-                            onclick="hapusBarang('${barang.ID}', '${barang.nama_barang}')"
-                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition"
-                        >
-                            🗑️ Hapus
-                        </button>
-                    </td>
-                </tr>
-            `;
+        <tr class="text-center hover:bg-gray-50 transition">
+          <td class="px-6 py-3">
+            <img src="${urlGambar}" class="w-12 h-12 object-cover rounded mx-auto border">
+          </td>
+          <td class="px-6 py-3">${barang.ID}</td>
+          <td class="px-6 py-3">${barang.nama_barang}</td>
+          <td class="px-6 py-3">Rp ${Number(barang.harga).toLocaleString("id-ID")}</td>
+          <td class="px-6 py-3 flex justify-center gap-2">
+            <button
+              onclick="isiFormEdit('${barang.ID}', '${barang.nama_barang}', '${barang.harga}')"
+              class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-semibold transition"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onclick="hapusBarang('${barang.ID}', '${barang.nama_barang}')"
+              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-semibold transition"
+            >
+              🗑️ Hapus
+            </button>
+          </td>
+        </tr>
+      `;
     });
 
     document.getElementById("tabel-barang").innerHTML = barisHTML;
@@ -85,18 +90,18 @@ document.addEventListener("DOMContentLoaded", function () {
   // =========================
   document.getElementById("search").addEventListener("input", function () {
     const keyword = this.value.toLowerCase();
-
-    const hasilFilter = semuaData.filter((barang) => barang.nama_barang.toLowerCase().includes(keyword));
-
+    const hasilFilter = semuaData.filter((barang) =>
+      barang.nama_barang.toLowerCase().includes(keyword)
+    );
     tampilkanData(hasilFilter);
   });
 
   // =========================
-  // TAMBAH / UPDATE BARANG (POST)
+  // TAMBAH / UPDATE BARANG
   // =========================
   document.getElementById("btn-simpan").addEventListener("click", async function () {
-    const id = document.getElementById("input-id").value.trim();
-    const nama = document.getElementById("input-nama").value.trim();
+    const id    = document.getElementById("input-id").value.trim();
+    const nama  = document.getElementById("input-nama").value.trim();
     const harga = document.getElementById("input-harga").value.trim();
 
     if (!nama || !harga) {
@@ -104,11 +109,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    // Jika dalam mode edit, jalankan update
     if (modeEdit && id) {
       await updateBarang(id, nama, harga);
     } else {
-      // Mode tambah baru
       await tambahBarang(nama, harga);
     }
   });
@@ -116,28 +119,29 @@ document.addEventListener("DOMContentLoaded", function () {
   // -- TAMBAH BARU --
   async function tambahBarang(nama, harga) {
     try {
-      console.log("TOKEN POST =", myToken);
+      // ← DIPERBAIKI: pakai FormData agar bisa kirim gambar sekaligus
+      const formData = new FormData();
+      formData.append("nama_barang", nama);
+      formData.append("harga", harga);
+
+      const gambar = document.getElementById("input-gambar")?.files[0];
+      if (gambar) {
+        formData.append("gambar", gambar);
+      }
 
       const response = await fetch(URL_TAMBAH, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: myToken,
+          // JANGAN set Content-Type di sini — browser atur otomatis untuk FormData
         },
-        body: JSON.stringify({
-          nama_barang: nama,
-          harga: parseInt(harga),
-        }),
+        body: formData,
       });
 
-      const text = await response.text();
-      console.log("POST Response Raw:", text);
-
+      const text  = await response.text();
       const hasil = text ? JSON.parse(text) : {};
 
-      console.log("HASIL PARSE:", hasil);
-      console.log("STATUS:", hasil.status);
-      console.log("MESSAGE:", hasil.message);
+      console.log("POST Response:", hasil);
 
       if (hasil.status === "success") {
         alert("✅ " + hasil.message);
@@ -164,9 +168,10 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({ id: id, nama_barang: nama, harga: parseInt(harga) }),
       });
 
-      const text = await response.text();
-      console.log("UPDATE Response:", text);
+      const text  = await response.text();
       const hasil = text ? JSON.parse(text) : {};
+
+      console.log("UPDATE Response:", hasil);
 
       if (hasil.status === "success") {
         alert("✅ " + (hasil.message || "Data berhasil diperbarui!"));
@@ -182,23 +187,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // =========================
-  // ISI FORM EDIT (dipanggil dari tombol di tabel)
+  // ISI FORM EDIT
   // =========================
   window.isiFormEdit = function (id, nama, harga) {
     modeEdit = true;
 
-    document.getElementById("input-id").value = id;
-    document.getElementById("input-nama").value = nama;
+    document.getElementById("input-id").value    = id;
+    document.getElementById("input-nama").value  = nama;
     document.getElementById("input-harga").value = harga;
 
-    // Ubah tampilan form ke mode edit
     document.getElementById("form-title").textContent = "✏️ Edit Barang (ID: " + id + ")";
     document.getElementById("btn-simpan").textContent = "💾 Update";
     document.getElementById("btn-simpan").classList.replace("bg-emerald-500", "bg-yellow-500");
     document.getElementById("btn-simpan").classList.replace("hover:bg-emerald-600", "hover:bg-yellow-600");
     document.getElementById("btn-batal").classList.remove("hidden");
 
-    // Scroll ke form agar user tahu input sudah terisi
     document.getElementById("input-nama").focus();
   };
 
@@ -212,9 +215,12 @@ document.addEventListener("DOMContentLoaded", function () {
   function resetForm() {
     modeEdit = false;
 
-    document.getElementById("input-id").value = "";
-    document.getElementById("input-nama").value = "";
+    document.getElementById("input-id").value    = "";
+    document.getElementById("input-nama").value  = "";
     document.getElementById("input-harga").value = "";
+
+    const inputGambar = document.getElementById("input-gambar");
+    if (inputGambar) inputGambar.value = "";
 
     document.getElementById("form-title").textContent = "➕ Tambah Barang Baru";
     document.getElementById("btn-simpan").textContent = "💾 Simpan";
@@ -224,13 +230,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // =========================
-  // HAPUS BARANG (DELETE)
+  // HAPUS BARANG
   // =========================
   window.hapusBarang = async function (id, nama) {
-    // Konfirmasi sebelum menghapus agar tidak tidak sengaja hapus data krusial
-    const konfirmasi = confirm(`⚠️ Apakah kamu yakin ingin menghapus barang:\n"${nama}" (ID: ${id})?\n\nTindakan ini tidak dapat dibatalkan!`);
+    const konfirmasi = confirm(
+      `⚠️ Apakah kamu yakin ingin menghapus barang:\n"${nama}" (ID: ${id})?\n\nTindakan ini tidak dapat dibatalkan!`
+    );
 
-    if (!konfirmasi) return; // batalkan jika user memilih Cancel
+    if (!konfirmasi) return;
 
     try {
       const response = await fetch(URL_HAPUS, {
@@ -242,13 +249,14 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({ id: id }),
       });
 
-      const text = await response.text();
-      console.log("DELETE Response:", text);
+      const text  = await response.text();
       const hasil = text ? JSON.parse(text) : {};
+
+      console.log("DELETE Response:", hasil);
 
       if (hasil.status === "success") {
         alert("🗑️ " + (hasil.pesan || "Barang berhasil dihapus!"));
-        ambilDataBarang(); // refresh tabel
+        ambilDataBarang();
       } else {
         alert("❌ " + (hasil.pesan || "Gagal menghapus data"));
       }
