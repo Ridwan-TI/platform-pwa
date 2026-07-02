@@ -2,7 +2,7 @@
 // File baru: edit_barang.php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
 // Handle preflight OPTIONS request
@@ -12,6 +12,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/koneksi.php';
+
+// ==========================
+// VALIDASI TOKEN (DENGAN FALLBACK UNTUK CGI/FASTCGI HOSTING)
+// ==========================
+$token_dikirim = '';
+
+if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    $token_dikirim = trim($_SERVER['HTTP_AUTHORIZATION']);
+} elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $token_dikirim = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+} else {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    foreach ($headers as $key => $val) {
+        if (strtolower($key) === 'authorization') {
+            $token_dikirim = trim($val);
+            break;
+        }
+    }
+}
+
+if ($token_dikirim === '') {
+    echo json_encode([
+        "status"  => "error",
+        "pesan"   => "Token tidak ditemukan",
+        "message" => "Token tidak ditemukan"
+    ]);
+    exit();
+}
+
+$token_aman = mysqli_real_escape_string($koneksi, $token_dikirim);
+$cek_token  = mysqli_query($koneksi, "SELECT id FROM users WHERE token='$token_aman' LIMIT 1");
+
+if (mysqli_num_rows($cek_token) === 0) {
+    echo json_encode([
+        "status"  => "error",
+        "pesan"   => "Akses Ditolak! Token Invalid.",
+        "message" => "Akses Ditolak! Token Invalid."
+    ]);
+    exit();
+}
 
 $json_data = file_get_contents("php://input");
 $data = json_decode($json_data, true);

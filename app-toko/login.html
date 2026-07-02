@@ -261,8 +261,19 @@
         document.getElementById('btn-masuk').addEventListener('click', async function() {
             const usr = document.getElementById('username').value;
             const pwd = document.getElementById('password').value;
+
+            const getApiBaseUrl = () => {
+                const path = window.location.pathname;
+                if (path.includes("/app-toko/")) {
+                    return "../api-toko/";
+                } else {
+                    return "api-toko/";
+                }
+            };
+            const API_BASE = getApiBaseUrl();
+
             try {
-                const res = await fetch("http://localhost/toko-app-main/api-toko/login.php", {
+                const res = await fetch(API_BASE + "login.php", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: usr, password: pwd })

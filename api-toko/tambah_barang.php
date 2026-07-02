@@ -12,10 +12,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/koneksi.php';
 
 // ==========================
-// VALIDASI TOKEN
+// VALIDASI TOKEN (DENGAN FALLBACK UNTUK CGI/FASTCGI HOSTING)
 // ==========================
-$headers       = getallheaders();
-$token_dikirim = trim($headers['Authorization'] ?? $headers['authorization'] ?? '');
+$token_dikirim = '';
+
+if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    $token_dikirim = trim($_SERVER['HTTP_AUTHORIZATION']);
+} elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $token_dikirim = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+} else {
+    $headers = function_exists('getallheaders') ? getallheaders() : [];
+    foreach ($headers as $key => $val) {
+        if (strtolower($key) === 'authorization') {
+            $token_dikirim = trim($val);
+            break;
+        }
+    }
+}
 
 if ($token_dikirim === '') {
     echo json_encode([

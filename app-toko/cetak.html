@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Stok Barang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Kustomisasi CSS Khusus untuk Printer */
+        @media print {
+
+            /* Memaksa kertas ukuran A4 dan menghilangkan margin default browser */
+            @page {
+                size: A4 portrait;
+                margin: 1cm;
+            }
+
+            /* Memaksa background color (seperti bg-gray-100) tetap tercetak */
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Sembunyikan elemen yang tidak perlu dicetak (misal: tombol loading) */
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-white p-8 max-w-4xl mx-auto text-black">
+
+    <!-- Tombol Loading Sementara -->
+    <div id="loading-indicator" class="no-print text-center text-blue-600 font-bold mb-4">
+        Mempersiapkan Laporan... Mohon Tunggu.
+    </div>
+
+    <!-- Kop Laporan Formal -->
+    <div class="text-center border-b-4 border-black pb-4 mb-6">
+        <h1 class="text-2xl font-bold uppercase tracking-widest">Aplikasi Toko PWA</h1>
+        <p class="text-sm">Jl. Ahmad Yani No.111, Pontianak, Kalimantan Barat</p>
+        <p class="text-xs">Email: kasir@tokopwa.com | Telp: 089611204114</p>
+
+        <h2 class="text-lg font-bold mt-6 underline underline-offset-4">LAPORAN INVENTARIS BARANG</h2>
+        <p class="text-xs text-gray-700 mt-2" id="tanggal-cetak"></p>
+    </div>
+
+    <!-- Tabel Polos & Tegas -->
+    <table class="w-full border-collapse border border-black text-sm mb-6">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="border border-black p-2 w-12">No</th>
+                <th class="border border-black p-2">Nama Barang</th>
+                <th class="border border-black p-2">Harga Satuan</th>
+            </tr>
+        </thead>
+        <tbody id="area-tabel-cetak">
+            <!-- Data disuntikkan via JS -->
+        </tbody>
+        <tfoot>
+            <tr class="font-bold bg-gray-100">
+                <td colspan="2" class="border border-black p-2 text-right">Total Aset (<span id="jumlah-item">0</span>
+                    Item):</td>
+                <td class="border border-black p-2 text-right" id="area-total">Rp 0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Kolom Tanda Tangan -->
+    <div class="flex justify-end mt-12">
+        <div class="text-center w-56">
+            <p class="mb-20 text-sm">Mengetahui,<br>Manajer Toko</p>
+            <p class="font-bold border-b border-black inline-block px-4 pb-1">Sucipto, M.Kom</p>
+            <p class="text-xs mt-1">NIDN: 1130038301</p>
+        </div>
+    </div>
+
+    <!-- Skrip Pemicu -->
+    <script src="cetak.js"></script>
+
+</body>
+
+</html>

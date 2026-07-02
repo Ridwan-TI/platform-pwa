@@ -2,7 +2,11 @@ const CACHE_NAME = 'app-toko-v1';
 const urlsToCache = [
   './',
   './index.html',
-  './app.js'
+  './app.js',
+  './login.html',
+  './cetak.html',
+  './cetak.js',
+  './manifest.json'
 ];
 
 // Install

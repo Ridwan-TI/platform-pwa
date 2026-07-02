@@ -4,6 +4,7 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
+// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -33,7 +34,7 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
 if ($token_dikirim === '') {
     echo json_encode([
         "status" => "error",
-        "pesan"  => "Token tidak ditemukan"
+        "message"  => "Token tidak ditemukan"
     ]);
     exit();
 }
@@ -44,7 +45,7 @@ $cek_token  = mysqli_query($koneksi, "SELECT id FROM users WHERE token='$token_a
 if (mysqli_num_rows($cek_token) === 0) {
     echo json_encode([
         "status" => "error",
-        "pesan"  => "Akses Ditolak! Token Invalid."
+        "message"  => "Akses Ditolak! Token Invalid."
     ]);
     exit();
 }
@@ -55,21 +56,25 @@ if (mysqli_num_rows($cek_token) === 0) {
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode([
         "status" => "error",
-        "pesan"  => "Method tidak diizinkan"
+        "message"  => "Method tidak diizinkan"
     ]);
     exit();
 }
 
-$query  = mysqli_query($koneksi, "SELECT * FROM barang ORDER BY ID DESC");
-$data   = [];
+// Murni mengambil SEMUA data barang, diurutkan berdasarkan abjad (A-Z)
+$query  = mysqli_query($koneksi, "SELECT * FROM barang ORDER BY nama_barang ASC");
+$data_laporan = [];
+$total_aset = 0; 
 
-while ($baris = mysqli_fetch_assoc($query)) {
-    $data[] = $baris;
+while ($row = mysqli_fetch_assoc($query)) {
+    $data_laporan[] = $row;
+    $total_aset += (int)$row['harga'];
 }
 
 echo json_encode([
-    "status"  => "success",
-    "message" => "Berhasil mengambil data",
-    "data"    => $data
+    "status" => "success",
+    "data" => $data_laporan,
+    "total_aset_rupiah" => $total_aset,
+    "total_item" => count($data_laporan)
 ]);
 ?>

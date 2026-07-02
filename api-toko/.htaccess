@@ -1,0 +1,13 @@
+# ----------------------------------------------------------------------
+# Apache Config for Toko Backend APIs (api-toko)
+# ----------------------------------------------------------------------
+
+# Nonaktifkan directory listing untuk folder ini demi keamanan
+Options -Indexes
+
+# Pastikan header Authorization lolos ke backend php (CGI/FastCGI)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+</IfModule>

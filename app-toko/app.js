@@ -8,19 +8,68 @@ if (!myToken) {
 
 document.addEventListener("DOMContentLoaded", function () {
   let semuaData = [];
+  let dataFiltered = []; // data setelah filter pencarian
   let modeEdit = false;
 
-  const URL_GET    = "http://localhost/toko-app-main/api-toko/get-barang.php";   // ← BARU
-  const URL_TAMBAH = "http://localhost/toko-app-main/api-toko/tambah_barang.php";
-  const URL_HAPUS  = "http://localhost/toko-app-main/api-toko/hapus_barang.php";
-  const URL_EDIT   = "http://localhost/toko-app-main/api-toko/edit_barang.php";
+  // =========================
+  // PAGINATION
+  // =========================
+  let halamanSaatIni = 1;
+  const itemPerHalaman = 5;
+
+  function totalHalaman() {
+    return Math.ceil(dataFiltered.length / itemPerHalaman) || 1;
+  }
+
+  function updateInfoHalaman() {
+    const total = dataFiltered.length;
+    const halaman = totalHalaman();
+    document.getElementById("info-halaman").textContent =
+      `Halaman ${halamanSaatIni} dari ${halaman} (Total: ${total} Data)`;
+
+    const btnPrev = document.getElementById("btn-prev");
+    const btnNext = document.getElementById("btn-next");
+
+    btnPrev.disabled = halamanSaatIni <= 1;
+    btnNext.disabled = halamanSaatIni >= halaman;
+  }
+
+  window.gantiHalaman = function (arah) {
+    const halaman = totalHalaman();
+    halamanSaatIni += arah;
+    if (halamanSaatIni < 1) halamanSaatIni = 1;
+    if (halamanSaatIni > halaman) halamanSaatIni = halaman;
+    renderHalaman();
+  };
+
+  function renderHalaman() {
+    const mulai = (halamanSaatIni - 1) * itemPerHalaman;
+    const akhir = mulai + itemPerHalaman;
+    const dataPaginate = dataFiltered.slice(mulai, akhir);
+    renderTabel(dataPaginate);
+    updateInfoHalaman();
+  }
+
+  const getApiBaseUrl = () => {
+    const path = window.location.pathname;
+    if (path.includes("/app-toko/")) {
+      return "../api-toko/";
+    } else {
+      return "api-toko/";
+    }
+  };
+  const API_BASE   = getApiBaseUrl();
+  const URL_GET    = API_BASE + "get-barang.php";
+  const URL_TAMBAH = API_BASE + "tambah_barang.php";
+  const URL_HAPUS  = API_BASE + "hapus_barang.php";
+  const URL_EDIT   = API_BASE + "edit_barang.php";
 
   // =========================
   // AMBIL DATA (GET)
   // =========================
   async function ambilDataBarang() {
     try {
-      const response = await fetch(URL_GET, {  // ← DIPERBAIKI: pakai URL_GET bukan URL_TAMBAH
+      const response = await fetch(URL_GET, {
         method: "GET",
         headers: {
           Authorization: myToken,
@@ -34,7 +83,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (hasil.status === "success") {
         semuaData = hasil.data || [];
-        tampilkanData(semuaData);
+        dataFiltered = [...semuaData];
+        halamanSaatIni = 1;
+        renderHalaman();
+        document.getElementById("total-barang").textContent = semuaData.length;
+        renderDashboard();
       } else {
         console.error("Response tidak sesuai:", hasil);
       }
@@ -44,23 +97,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // =========================
-  // TAMPILKAN DATA
+  // RENDER TABEL (tanpa pagination logic)
   // =========================
-  function tampilkanData(data) {
+  function renderTabel(data) {
     let barisHTML = "";
 
     data.forEach((barang) => {
-      // URL gambar — fallback jika tidak ada
       let urlGambar = barang.gambar
-        ? `http://localhost/toko-app-main/api-toko/uploads/${barang.gambar}`
+        ? `${API_BASE}uploads/${barang.gambar}`
         : `https://via.placeholder.com/50?text=No+Img`;
 
       barisHTML += `
         <tr class="text-center hover:bg-gray-50 transition">
+          <td class="px-6 py-3">${barang.ID}</td>
           <td class="px-6 py-3">
             <img src="${urlGambar}" class="w-12 h-12 object-cover rounded mx-auto border">
           </td>
-          <td class="px-6 py-3">${barang.ID}</td>
           <td class="px-6 py-3">${barang.nama_barang}</td>
           <td class="px-6 py-3">Rp ${Number(barang.harga).toLocaleString("id-ID")}</td>
           <td class="px-6 py-3 flex justify-center gap-2">
@@ -82,19 +134,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("tabel-barang").innerHTML = barisHTML;
-    document.getElementById("total-barang").textContent = data.length;
+  }
+
+  // fungsi lama tampilkanData tetap ada agar tidak merusak referensi lain
+  function tampilkanData(data) {
+    dataFiltered = data;
+    halamanSaatIni = 1;
+    renderHalaman();
+    document.getElementById("total-barang").textContent = semuaData.length;
   }
 
   // =========================
-  // SEARCH
+  // SEARCH — input #search (sidebar/utama)
   // =========================
   document.getElementById("search").addEventListener("input", function () {
-    const keyword = this.value.toLowerCase();
+    jalankanFilter(this.value);
+    // sinkronkan input-cari juga
+    const inputCari = document.getElementById("input-cari");
+    if (inputCari) inputCari.value = this.value;
+  });
+
+  // =========================
+  // SEARCH — input #input-cari (dari HTML tambahan)
+  // =========================
+  window.jalankanPencarian = function () {
+    const keyword = document.getElementById("input-cari").value;
+    jalankanFilter(keyword);
+    // sinkronkan input search utama juga
+    const inputSearch = document.getElementById("search");
+    if (inputSearch) inputSearch.value = keyword;
+  };
+
+  function jalankanFilter(keyword) {
+    const kw = keyword.toLowerCase();
     const hasilFilter = semuaData.filter((barang) =>
-      barang.nama_barang.toLowerCase().includes(keyword)
+      barang.nama_barang.toLowerCase().includes(kw)
     );
     tampilkanData(hasilFilter);
-  });
+  }
 
   // =========================
   // TAMBAH / UPDATE BARANG
@@ -119,7 +196,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // -- TAMBAH BARU --
   async function tambahBarang(nama, harga) {
     try {
-      // ← DIPERBAIKI: pakai FormData agar bisa kirim gambar sekaligus
       const formData = new FormData();
       formData.append("nama_barang", nama);
       formData.append("harga", harga);
@@ -133,7 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
         method: "POST",
         headers: {
           Authorization: myToken,
-          // JANGAN set Content-Type di sini — browser atur otomatis untuk FormData
         },
         body: formData,
       });
@@ -185,6 +260,70 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("❌ Terjadi kesalahan koneksi ke server.");
     }
   }
+
+
+  async function renderDashboard() {
+    try {
+        // Ambil data JSON dari backend dengan relative path & header Authorization
+        const response = await fetch(API_BASE + 'statistik.php', {
+            method: 'GET',
+            headers: {
+                'Authorization': myToken
+            }
+        });
+        const json = await response.json();
+
+        if (json.status === 'success') {
+            const ctx = document.getElementById('myChart');
+
+            // --- BUG FIX: GHOSTING EFFECT ---
+            // Jika kanvas sudah pernah digambar, kita harus menghancurkannya dulu.
+            // Jika tidak, grafik lama dan baru akan bertumpuk, menyebabkan kedipan 
+            // aneh (glitch) saat Anda menggeser mouse di atas grafik.
+            let chartStatus = Chart.getChart("myChart");
+            if (chartStatus != undefined) {
+                chartStatus.destroy();
+            }
+
+            // Mulai melukis grafik baru
+            new Chart(ctx, {
+                type: 'bar', // Tipe grafik batang
+                data: {
+                    labels: json.chart_data.labels, // Data Sumbu X (Array Nama)
+                    datasets: [{
+                        label: 'Harga Barang (Rp)',
+                        data: json.chart_data.values, // Data Sumbu Y (Array Harga)
+                        // Kustomisasi Warna
+                        backgroundColor: [
+                            'rgba(234, 88, 12, 0.6)',  // Orange utama
+                            'rgba(59, 130, 246, 0.6)', // Biru
+                            'rgba(16, 185, 129, 0.6)', // Hijau
+                            'rgba(236, 72, 153, 0.6)', // Pink
+                            'rgba(139, 92, 246, 0.6)'  // Ungu
+                        ],
+                        borderColor: 'rgba(234, 88, 12, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6 // Ujung batang dibuat agak membulat
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Wajib false agar mengikuti tinggi container
+                    scales: {
+                        y: { 
+                            beginAtZero: true // Sumbu Y wajib dimulai dari 0 agar proporsional
+                        } 
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Gagal memuat grafik:', error);
+    }
+}
+
+// Panggil fungsi ini agar grafik muncul saat web pertama kali di-load
+renderDashboard();
 
   // =========================
   // ISI FORM EDIT
@@ -272,7 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
   ambilDataBarang();
 
   // =========================
-  // SERVICE WORKER
+  // SERVICE WORKER (PWA)
   // =========================
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker

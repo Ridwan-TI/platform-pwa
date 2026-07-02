@@ -1,0 +1,30 @@
+# ----------------------------------------------------------------------
+# Apache Config for Toko PWA Hosting (InfinityFree)
+# ----------------------------------------------------------------------
+
+# Nonaktifkan directory listing (keamanan)
+Options -Indexes
+
+# Mengizinkan Header Authorization lolos ke script PHP (penting untuk CGI/FastCGI)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+# Menonaktifkan cache untuk file PWA (manifest.json dan sw.js)
+# Agar pembaruan manifest/PWA langsung terdeteksi oleh browser tanpa tertahan cache server
+<FilesMatch "^(sw\.js|manifest\.json)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </IfModule>
+</FilesMatch>
+
+# Kontrol Cache opsional untuk HTML dan JS/CSS agar cepat terupdate
+<FilesMatch "\.(html|js|css)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-cache, must-revalidate"
+    </IfModule>
+</FilesMatch>

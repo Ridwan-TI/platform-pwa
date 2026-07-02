@@ -4,6 +4,7 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
 
+// Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -49,27 +50,28 @@ if (mysqli_num_rows($cek_token) === 0) {
     exit();
 }
 
-// ==========================
-// AMBIL DATA BARANG
-// ==========================
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    echo json_encode([
-        "status" => "error",
-        "pesan"  => "Method tidak diizinkan"
-    ]);
-    exit();
+// Ambil 5 barang paling mahal
+// Fungsi LIMIT 5 mencegah grafik terlalu padat jika data ada ribuan
+$query = "SELECT nama_barang, harga FROM barang ORDER BY harga DESC LIMIT 5";
+$hasil = mysqli_query($koneksi, $query);
+
+$labels_barang = []; // Wadah Sumbu X (Teks label bawah grafik)
+$values_harga = [];  // Wadah Sumbu Y (Batang grafik)
+
+while ($row = mysqli_fetch_assoc($hasil)) {
+    $labels_barang[] = $row['nama_barang'];
+    
+    // (int) Sangat krusial agar Javascript mengenalinya sebagai Number
+    $values_harga[] = (int) $row['harga']; 
 }
 
-$query  = mysqli_query($koneksi, "SELECT * FROM barang ORDER BY ID DESC");
-$data   = [];
-
-while ($baris = mysqli_fetch_assoc($query)) {
-    $data[] = $baris;
-}
-
+// Susun respon JSON dengan struktur berlapis agar mudah dibaca Javascript
 echo json_encode([
-    "status"  => "success",
-    "message" => "Berhasil mengambil data",
-    "data"    => $data
+    "status" => "success",
+    "pesan" => "Data statistik berhasil dimuat",
+    "chart_data" => [
+        "labels" => $labels_barang,
+        "values" => $values_harga
+    ]
 ]);
 ?>

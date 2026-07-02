@@ -1,8 +1,8 @@
 {
   "name": "App Toko",
   "short_name": "Toko",
-  "start_url": "/app-toko/index.html",
-  "scope": "/app-toko/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
