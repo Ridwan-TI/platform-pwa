@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS `barang` (
   `nama_barang` varchar(255) NOT NULL,
   `harga` int(11) NOT NULL,
   `gambar` varchar(255) DEFAULT NULL,
+  `kode_qr` varchar(255) DEFAULT NULL,
+  `latitude` varchar(50) DEFAULT NULL,
+  `longitude` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

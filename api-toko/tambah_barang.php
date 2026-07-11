@@ -65,6 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // ==========================
 $nama  = trim($_POST['nama_barang'] ?? '');
 $harga = trim($_POST['harga'] ?? '');
+$kodeQr = trim($_POST['kode_qr'] ?? '');
+$latitude = trim($_POST['latitude'] ?? '');
+$longitude = trim($_POST['longitude'] ?? '');
 
 if ($nama === '' || $harga === '') {
     echo json_encode([
@@ -76,6 +79,9 @@ if ($nama === '' || $harga === '') {
 
 $nama  = mysqli_real_escape_string($koneksi, $nama);
 $harga = intval($harga);
+$kodeQr = $kodeQr !== '' ? "'" . mysqli_real_escape_string($koneksi, $kodeQr) . "'" : "NULL";
+$latitude = $latitude !== '' ? "'" . mysqli_real_escape_string($koneksi, $latitude) . "'" : "NULL";
+$longitude = $longitude !== '' ? "'" . mysqli_real_escape_string($koneksi, $longitude) . "'" : "NULL";
 
 // ==========================
 // UPLOAD GAMBAR (OPSIONAL)
@@ -118,11 +124,11 @@ if (isset($_FILES['gambar']) && $_FILES['gambar']['error'] === UPLOAD_ERR_OK) {
 // ==========================
 if ($namaFile !== null) {
     $namaFileSafe = mysqli_real_escape_string($koneksi, $namaFile);
-    $query = "INSERT INTO barang (nama_barang, harga, gambar)
-              VALUES ('$nama', '$harga', '$namaFileSafe')";
+    $query = "INSERT INTO barang (nama_barang, harga, gambar, kode_qr, latitude, longitude)
+              VALUES ('$nama', '$harga', '$namaFileSafe', $kodeQr, $latitude, $longitude)";
 } else {
-    $query = "INSERT INTO barang (nama_barang, harga)
-              VALUES ('$nama', '$harga')";
+    $query = "INSERT INTO barang (nama_barang, harga, kode_qr, latitude, longitude)
+              VALUES ('$nama', '$harga', $kodeQr, $latitude, $longitude)";
 }
 
 $hasil = mysqli_query($koneksi, $query);

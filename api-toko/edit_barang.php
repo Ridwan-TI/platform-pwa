@@ -62,8 +62,17 @@ if (isset($data['id'], $data['nama_barang'], $data['harga'])) {
     $id          = mysqli_real_escape_string($koneksi, $data['id']);
     $nama_barang = mysqli_real_escape_string($koneksi, $data['nama_barang']);
     $harga       = (int) $data['harga'];
+    $kode_qr     = isset($data['kode_qr']) && trim($data['kode_qr']) !== '' ? "'" . mysqli_real_escape_string($koneksi, trim($data['kode_qr'])) . "'" : "NULL";
+    $latitude    = isset($data['latitude']) && trim($data['latitude']) !== '' ? "'" . mysqli_real_escape_string($koneksi, trim($data['latitude'])) . "'" : "NULL";
+    $longitude   = isset($data['longitude']) && trim($data['longitude']) !== '' ? "'" . mysqli_real_escape_string($koneksi, trim($data['longitude'])) . "'" : "NULL";
 
-    $query = "UPDATE barang SET nama_barang = '$nama_barang', harga = $harga WHERE ID = '$id'";
+    $query = "UPDATE barang SET 
+                nama_barang = '$nama_barang', 
+                harga = $harga, 
+                kode_qr = $kode_qr,
+                latitude = $latitude,
+                longitude = $longitude
+              WHERE ID = '$id'";
     $hasil = mysqli_query($koneksi, $query);
 
     if ($hasil) {

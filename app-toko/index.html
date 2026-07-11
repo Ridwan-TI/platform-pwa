@@ -1,758 +1,1126 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#7c3aed" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Toko" />
-    <title>Aplikasi Toko PWA</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="icons/icon-192.png" type="image/png" />
-    <link rel="apple-touch-icon" href="icons/icon-192.png" />
-     <!-- 1. IMPORT PUSTAKA CHART.JS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Toko" />
+  <title>Aplikasi Toko PWA</title>
 
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <!-- 1. IMPORT PUSTAKA CHART.JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- IMPORT PUSTAKA HTML5-QRCODE -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
-      body {
-        font-family: "Poppins", sans-serif;
-        min-height: 100vh;
-        background: linear-gradient(145deg, #0a1628 0%, #0d2657 40%, #1a4a9e 75%, #2563eb 100%);
-        padding: 0;
-      }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      /* ============================================================
+    body {
+      font-family: "Poppins", sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0a1628 0%, #0d2657 40%, #1a4a9e 75%, #2563eb 100%);
+      padding: 0;
+    }
+
+    /* ============================================================
          SIDEBAR — Desktop (≥1024px): full 240px
       ============================================================ */
-      .sidebar {
-        width: 240px;
-        min-height: 100vh;
-        background: rgba(255,255,255,0.05);
-        border-right: 1px solid rgba(255,255,255,0.1);
-        padding: 1.5rem 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        position: fixed;
-        top: 0; left: 0; bottom: 0;
-        z-index: 100;
-        transition: width 0.25s ease;
-        overflow: hidden;
-      }
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: width 0.25s ease;
+      overflow: hidden;
+    }
 
-      .sidebar .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-      .sidebar .logo span {
-        color: white;
-        font-size: 18px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        transition: opacity 0.2s;
-      }
+    .sidebar .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
-      .sidebar nav {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
+    .sidebar .logo span {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      transition: opacity 0.2s;
+    }
 
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        border-radius: 10px;
-        color: rgba(255,255,255,0.65);
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-        text-decoration: none;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-      .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-      .nav-item.active { background: rgba(124,58,237,0.4); color: white; }
-      .nav-item span.icon { font-size: 16px; flex-shrink: 0; }
-      .nav-item .nav-label { transition: opacity 0.2s; }
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-      .sidebar-footer {
-        margin-top: auto;
-      }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
-      .btn-logout {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        border-radius: 10px;
-        background: rgba(239,68,68,0.15);
-        border: 1px solid rgba(239,68,68,0.3);
-        color: #fca5a5;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s;
-        white-space: nowrap;
-        overflow: hidden;
-      }
-      .btn-logout:hover { background: rgba(239,68,68,0.28); }
-      .btn-logout .btn-label { transition: opacity 0.2s; }
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
 
-      /* ============================================================
+    .nav-item.active {
+      background: rgba(124, 58, 237, 0.4);
+      color: white;
+    }
+
+    .nav-item span.icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-item .nav-label {
+      transition: opacity 0.2s;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+    }
+
+    .btn-logout {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .btn-logout:hover {
+      background: rgba(239, 68, 68, 0.28);
+    }
+
+    .btn-logout .btn-label {
+      transition: opacity 0.2s;
+    }
+
+    /* ============================================================
          MAIN CONTENT
       ============================================================ */
-      .main {
-        margin-left: 240px;
-        padding: 2rem;
-        min-height: 100vh;
-        transition: margin-left 0.25s ease;
-      }
+    .main {
+      margin-left: 240px;
+      padding: 2rem;
+      min-height: 100vh;
+      transition: margin-left 0.25s ease;
+    }
 
-      /* ============================================================
+    /* ============================================================
          TOPBAR
       ============================================================ */
-      .topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.75rem;
-      }
-      .topbar h1 {
-        font-size: 22px;
-        font-weight: 700;
-        color: white;
-      }
-      .topbar p {
-        font-size: 12px;
-        color: rgba(255,255,255,0.55);
-        margin-top: 2px;
-      }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+    }
 
-      /* ============================================================
+    .topbar h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .topbar p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      margin-top: 2px;
+    }
+
+    /* ============================================================
          SEARCH
       ============================================================ */
-      .search-wrap {
-        margin-bottom: 1.25rem;
-      }
-      .search-wrap input {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 10px;
-        padding: 10px 16px;
-        font-size: 13px;
-        color: white;
-        width: 280px;
-        max-width: 100%;
-        outline: none;
-        font-family: "Poppins", sans-serif;
-        transition: border-color 0.2s;
-      }
-      .search-wrap input::placeholder { color: rgba(255,255,255,0.4); }
-      .search-wrap input:focus { border-color: #7c3aed; background: rgba(255,255,255,0.14); }
+    .search-wrap {
+      margin-bottom: 1.25rem;
+    }
 
-      /* ============================================================
+    .search-wrap input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: white;
+      width: 280px;
+      max-width: 100%;
+      outline: none;
+      font-family: "Poppins", sans-serif;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .search-wrap input:focus {
+      border-color: #7c3aed;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* ============================================================
          CARD
       ============================================================ */
-      .card {
-        background: rgba(255,255,255,0.97);
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.25);
-      }
+    .card {
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    }
 
-      .card-header {
-        background: linear-gradient(90deg, #7c3aed, #6d28d9);
-        padding: 14px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .card-header h2 {
-        font-size: 14px;
-        font-weight: 600;
-        color: white;
-      }
-      .card-header .badge {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 10px;
-        border-radius: 20px;
-      }
+    .card-header {
+      background: linear-gradient(90deg, #7c3aed, #6d28d9);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-      /* ============================================================
+    .card-header h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .card-header .badge {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ============================================================
          FORM
       ============================================================ */
-      .form-section {
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid #f1f5f9;
-        background: #fafafa;
-      }
-      .form-section h3 {
-        font-size: 12px;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 12px;
-      }
-      .form-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: flex-end;
-      }
-      .form-field { display: flex; flex-direction: column; gap: 4px; }
-      .form-field label {
-        font-size: 10px;
-        font-weight: 600;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-      }
-      .form-field input[type="text"],
-      .form-field input[type="number"] {
-        padding: 9px 12px;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 13px;
-        font-family: "Poppins", sans-serif;
-        color: #111827;
-        outline: none;
-        transition: border-color 0.2s;
-        background: white;
-        min-width: 150px;
-        width: 100%;
-      }
-      .form-field input:focus { border-color: #7c3aed; }
-      .form-field input[type="file"] {
-        font-size: 12px;
-        font-family: "Poppins", sans-serif;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 7px 10px;
-        background: white;
-        color: #6b7280;
-        cursor: pointer;
-        width: 100%;
-      }
+    .form-section {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      background: #fafafa;
+    }
 
-      .btn-simpan {
-        padding: 9px 20px;
-        background: #7c3aed;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        font-family: "Poppins", sans-serif;
-        cursor: pointer;
-        transition: background 0.2s;
-        white-space: nowrap;
-      }
-      .btn-simpan:hover { background: #6d28d9; }
+    .form-section h3 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
 
-      .btn-batal {
-        padding: 9px 16px;
-        background: #f3f4f6;
-        color: #6b7280;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        font-family: "Poppins", sans-serif;
-        cursor: pointer;
-        transition: background 0.2s;
-        white-space: nowrap;
-      }
-      .btn-batal:hover { background: #e5e7eb; }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
 
-      /* ============================================================
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-field label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-field input[type="text"],
+    .form-field input[type="number"] {
+      padding: 9px 12px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: "Poppins", sans-serif;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.2s;
+      background: white;
+      min-width: 150px;
+      width: 100%;
+    }
+
+    .form-field input:focus {
+      border-color: #7c3aed;
+    }
+
+    .form-field input[type="file"] {
+      font-size: 12px;
+      font-family: "Poppins", sans-serif;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 7px 10px;
+      background: white;
+      color: #6b7280;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-simpan {
+      padding: 9px 20px;
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: "Poppins", sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-simpan:hover {
+      background: #6d28d9;
+    }
+
+    .btn-batal {
+      padding: 9px 16px;
+      background: #f3f4f6;
+      color: #6b7280;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: "Poppins", sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-batal:hover {
+      background: #e5e7eb;
+    }
+
+    /* ============================================================
          TABLE — scrollable wrapper agar tidak overflow di mobile
       ============================================================ */
-      .table-scroll {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
 
-      table {
-        width: 100%;
-        min-width: 520px;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-      thead tr {
-        background: #f8fafc;
-        border-bottom: 1px solid #e5e7eb;
-      }
-      thead th {
-        padding: 12px 20px;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 600;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-      }
-      tbody td {
-        padding: 12px 20px;
-        text-align: center;
-        color: #374151;
-        vertical-align: middle;
-      }
-      tbody tr {
-        border-bottom: 1px solid #f1f5f9;
-        transition: background 0.15s;
-      }
-      tbody tr:hover { background: #f8f4ff; }
-      tbody tr:last-child { border-bottom: none; }
+    table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
 
-      /* ============================================================
+    thead tr {
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    thead th {
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 12px 20px;
+      text-align: center;
+      color: #374151;
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: #f8f4ff;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    /* ============================================================
          PAGINATION
       ============================================================ */
-      .pagination-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 20px;
-        background: #fff;
-        border-top: 1px solid #f1f5f9;
-        font-size: 12px;
-        color: #6b7280;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .pagination-bar .btn-page {
-        padding: 7px 16px;
-        border-radius: 8px;
-        border: none;
-        font-size: 12px;
-        font-weight: 600;
-        font-family: "Poppins", sans-serif;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .pagination-bar .btn-page:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-      .btn-prev-style { background: #e5e7eb; color: #374151; }
-      .btn-prev-style:not(:disabled):hover { background: #d1d5db; }
-      .btn-next-style { background: #7c3aed; color: white; }
-      .btn-next-style:not(:disabled):hover { background: #6d28d9; }
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #fff;
+      border-top: 1px solid #f1f5f9;
+      font-size: 12px;
+      color: #6b7280;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
 
-      /* ============================================================
+    .pagination-bar .btn-page {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: "Poppins", sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .pagination-bar .btn-page:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-prev-style {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-prev-style:not(:disabled):hover {
+      background: #d1d5db;
+    }
+
+    .btn-next-style {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .btn-next-style:not(:disabled):hover {
+      background: #6d28d9;
+    }
+
+    /* ============================================================
          FOOTER
       ============================================================ */
-      .footer-bar {
-        margin-top: 1.25rem;
-        font-size: 12px;
-        color: rgba(255,255,255,0.5);
-      }
-      .footer-bar span {
-        font-weight: 600;
-        color: rgba(255,255,255,0.85);
-      }
+    .footer-bar {
+      margin-top: 1.25rem;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
 
-      /* ============================================================
+    .footer-bar span {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* ============================================================
          DECORATIVE CIRCLES
       ============================================================ */
-      .bg-circle-1 {
-        position: fixed; top: -80px; right: -80px;
-        width: 300px; height: 300px; border-radius: 50%;
-        background: rgba(124,58,237,0.12);
-        pointer-events: none;
-      }
-      .bg-circle-2 {
-        position: fixed; bottom: -60px; left: 180px;
-        width: 200px; height: 200px; border-radius: 50%;
-        background: rgba(37,99,235,0.1);
-        pointer-events: none;
-      }
+    .bg-circle-1 {
+      position: fixed;
+      top: -80px;
+      right: -80px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.12);
+      pointer-events: none;
+    }
 
-      /* ============================================================
+    .bg-circle-2 {
+      position: fixed;
+      bottom: -60px;
+      left: 180px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.1);
+      pointer-events: none;
+    }
+
+    /* ============================================================
          BOTTOM NAV — Mobile only (hidden by default)
       ============================================================ */
-      .bottom-nav {
-        display: none;
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        background: rgba(10, 22, 40, 0.95);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-top: 1px solid rgba(255,255,255,0.12);
-        padding: 8px 0 env(safe-area-inset-bottom, 8px);
-        z-index: 200;
-      }
-      .bottom-nav-inner {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-      }
-      .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 3px;
-        padding: 6px 20px;
-        border-radius: 10px;
-        color: rgba(255,255,255,0.55);
-        font-size: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        transition: color 0.2s;
-        flex: 1;
-        text-align: center;
-      }
-      .bottom-nav-item span.icon { font-size: 20px; }
-      .bottom-nav-item.active { color: #a78bfa; }
-      .bottom-nav-logout {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 3px;
-        padding: 6px 20px;
-        color: #fca5a5;
-        font-size: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        text-align: center;
-        background: none;
-        border: none;
-        font-family: "Poppins", sans-serif;
-      }
-      .bottom-nav-logout span.icon { font-size: 20px; }
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 22, 40, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 0 env(safe-area-inset-bottom, 8px);
+      z-index: 200;
+    }
 
-      /* ============================================================
+    .bottom-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 20px;
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s;
+      flex: 1;
+      text-align: center;
+    }
+
+    .bottom-nav-item span.icon {
+      font-size: 20px;
+    }
+
+    .bottom-nav-item.active {
+      color: #a78bfa;
+    }
+
+    .bottom-nav-logout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 20px;
+      color: #fca5a5;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      background: none;
+      border: none;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .bottom-nav-logout span.icon {
+      font-size: 20px;
+    }
+
+    /* ============================================================
          MOBILE TOPBAR — hanya muncul di mobile
       ============================================================ */
-      .mobile-topbar {
-        display: none;
-        align-items: center;
-        gap: 10px;
-        padding: 14px 16px;
-        background: rgba(255,255,255,0.05);
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        margin-bottom: 1rem;
-        border-radius: 14px;
-      }
-      .mobile-topbar .logo-icon svg { flex-shrink: 0; }
-      .mobile-topbar .logo-text {
-        color: white;
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-      }
+    .mobile-topbar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 1rem;
+      border-radius: 14px;
+    }
 
-      /* ============================================================
+    .mobile-topbar .logo-icon svg {
+      flex-shrink: 0;
+    }
+
+    .mobile-topbar .logo-text {
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    /* ============================================================
          RESPONSIVE BREAKPOINTS
       ============================================================ */
 
-      /* --- Tablet (768px – 1023px): mini sidebar (ikon saja) --- */
-      @media (max-width: 1023px) and (min-width: 768px) {
-        .sidebar {
-          width: 64px;
-          padding: 1.5rem 0.75rem;
-          align-items: center;
-        }
-        .sidebar .logo span,
-        .nav-label,
-        .btn-label {
-          opacity: 0;
-          width: 0;
-          overflow: hidden;
-          display: inline-block;
-        }
-        .nav-item {
-          justify-content: center;
-          padding: 10px;
-          position: relative;
-        }
-        /* tooltip saat hover di tablet */
-        .nav-item:hover::after {
-          content: attr(data-label);
-          position: absolute;
-          left: 72px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: rgba(10,22,40,0.95);
-          color: white;
-          font-size: 12px;
-          font-weight: 600;
-          padding: 5px 12px;
-          border-radius: 8px;
-          white-space: nowrap;
-          pointer-events: none;
-          border: 1px solid rgba(255,255,255,0.15);
-          z-index: 999;
-        }
-        .btn-logout {
-          justify-content: center;
-          padding: 10px;
-        }
-        .main {
-          margin-left: 64px;
-          padding: 1.5rem 1.25rem;
-        }
-        .bg-circle-2 { left: 64px; }
+    /* --- Tablet (768px – 1023px): mini sidebar (ikon saja) --- */
+    @media (max-width: 1023px) and (min-width: 768px) {
+      .sidebar {
+        width: 64px;
+        padding: 1.5rem 0.75rem;
+        align-items: center;
       }
 
-      /* --- Mobile (<768px): tidak ada sidebar, pakai bottom nav --- */
-      @media (max-width: 767px) {
-        .sidebar { display: none; }
-        .bottom-nav { display: block; }
-        .mobile-topbar { display: flex; }
-
-        .main {
-          margin-left: 0;
-          padding: 1rem 1rem 90px;
-        }
-
-        .topbar {
-          margin-bottom: 1rem;
-        }
-        .topbar h1 { font-size: 18px; }
-
-        .search-wrap input { width: 100%; }
-
-        .form-section { padding: 1rem; }
-        .form-row {
-          flex-direction: column;
-          gap: 8px;
-        }
-        .form-field { width: 100%; }
-        .form-field input[type="text"],
-        .form-field input[type="number"] {
-          min-width: unset;
-          width: 100%;
-        }
-        .form-row > div:last-child {
-          width: 100%;
-          flex-direction: column;
-        }
-        .btn-simpan, .btn-batal {
-          width: 100%;
-          text-align: center;
-          padding: 11px 20px;
-        }
-
-        .card { border-radius: 12px; }
-        .card-header { padding: 12px 16px; }
-
-        .footer-bar { margin-bottom: 1rem; }
-
-        .bg-circle-1 { width: 180px; height: 180px; }
-        .bg-circle-2 { display: none; }
-
-        /* pagination di mobile */
-        .pagination-bar {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-        }
-        .pagination-bar > div {
-          width: 100%;
-          display: flex;
-          gap: 8px;
-        }
-        .pagination-bar .btn-page {
-          flex: 1;
-        }
+      .sidebar .logo span,
+      .nav-label,
+      .btn-label {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        display: inline-block;
       }
 
-      /* --- Extra small (<400px) --- */
-      @media (max-width: 399px) {
-        .main { padding: 0.75rem 0.75rem 90px; }
-        .topbar h1 { font-size: 16px; }
-        .mobile-topbar .logo-text { font-size: 13px; }
+      .nav-item {
+        justify-content: center;
+        padding: 10px;
+        position: relative;
       }
-    </style>
-  </head>
 
-  <body>
-    <div class="bg-circle-1"></div>
-    <div class="bg-circle-2"></div>
+      /* tooltip saat hover di tablet */
+      .nav-item:hover::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 72px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(10, 22, 40, 0.95);
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+        pointer-events: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        z-index: 999;
+      }
 
-    <!-- ============================================================
+      .btn-logout {
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .main {
+        margin-left: 64px;
+        padding: 1.5rem 1.25rem;
+      }
+
+      .bg-circle-2 {
+        left: 64px;
+      }
+    }
+
+    /* --- Mobile (<768px): tidak ada sidebar, pakai bottom nav --- */
+    @media (max-width: 767px) {
+      .sidebar {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: block;
+      }
+
+      .mobile-topbar {
+        display: flex;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 1rem 1rem 90px;
+      }
+
+      .topbar {
+        margin-bottom: 1rem;
+      }
+
+      .topbar h1 {
+        font-size: 18px;
+      }
+
+      .search-wrap input {
+        width: 100%;
+      }
+
+      .form-section {
+        padding: 1rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-field {
+        width: 100%;
+      }
+
+      .form-field input[type="text"],
+      .form-field input[type="number"] {
+        min-width: unset;
+        width: 100%;
+      }
+
+      .form-row>div:last-child {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .btn-simpan,
+      .btn-batal {
+        width: 100%;
+        text-align: center;
+        padding: 11px 20px;
+      }
+
+      .card {
+        border-radius: 12px;
+      }
+
+      .card-header {
+        padding: 12px 16px;
+      }
+
+      .footer-bar {
+        margin-bottom: 1rem;
+      }
+
+      .bg-circle-1 {
+        width: 180px;
+        height: 180px;
+      }
+
+      .bg-circle-2 {
+        display: none;
+      }
+
+      /* pagination di mobile */
+      .pagination-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .pagination-bar>div {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+      }
+
+      .pagination-bar .btn-page {
+        flex: 1;
+      }
+    }
+
+    /* --- Extra small (<400px) --- */
+    @media (max-width: 399px) {
+      .main {
+        padding: 0.75rem 0.75rem 90px;
+      }
+
+      .topbar h1 {
+        font-size: 16px;
+      }
+
+      .mobile-topbar .logo-text {
+        font-size: 13px;
+      }
+    }
+
+    /* Modal QR Scanner Styles */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-qr {
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      color: #1e293b;
+    }
+    
+    .modal-backdrop.active .modal-qr {
+      transform: scale(1);
+    }
+    
+    .modal-qr-header {
+      background: linear-gradient(90deg, #7c3aed, #6d28d9);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+    
+    .modal-qr-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .modal-qr-header button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    
+    .modal-qr-header button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-qr-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    #qr-modal-hint {
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+    }
+    
+    #qr-reader-main {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-circle-1"></div>
+  <div class="bg-circle-2"></div>
+
+  <!-- ============================================================
          SIDEBAR (Tablet & Desktop)
     ============================================================ -->
-    <div class="sidebar">
-      <div class="logo">
-        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" style="flex-shrink:0">
-          <rect width="12" height="12" rx="3" fill="white" opacity="0.9"/>
-          <rect x="16" width="12" height="12" rx="3" fill="white" opacity="0.6"/>
-          <rect y="16" width="12" height="12" rx="3" fill="white" opacity="0.6"/>
-          <rect x="16" y="16" width="12" height="12" rx="3" fill="white" opacity="0.4"/>
-        </svg>
-        <span>PAHLEVI STORE</span>
-      </div>
-
-      <nav>
-        <a class="nav-item active" href="#" data-label="Daftar Barang">
-          <span class="icon">🛒</span> <span class="nav-label">Daftar Barang</span>
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <button class="btn-logout" onclick="logout()">
-          🚪 <span class="btn-label">Logout</span>
-        </button>
-      </div>
+  <div class="sidebar">
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" style="flex-shrink:0">
+        <rect width="12" height="12" rx="3" fill="white" opacity="0.9" />
+        <rect x="16" width="12" height="12" rx="3" fill="white" opacity="0.6" />
+        <rect y="16" width="12" height="12" rx="3" fill="white" opacity="0.6" />
+        <rect x="16" y="16" width="12" height="12" rx="3" fill="white" opacity="0.4" />
+      </svg>
+      <span>PAHLEVI STORE</span>
     </div>
 
-    <!-- ============================================================
+    <nav>
+      <a class="nav-item active" href="#" data-label="Daftar Barang">
+        <span class="icon">🛒</span> <span class="nav-label">Daftar Barang</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">
+        🚪 <span class="btn-label">Logout</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
          BOTTOM NAV (Mobile only)
     ============================================================ -->
-    <div class="bottom-nav">
-      <div class="bottom-nav-inner">
-        <a class="bottom-nav-item active" href="#">
-          <span class="icon">🛒</span>
-          Barang
-        </a>
-        <button class="bottom-nav-logout" onclick="logout()">
-          <span class="icon">🚪</span>
-          Logout
-        </button>
-      </div>
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a class="bottom-nav-item active" href="#">
+        <span class="icon">🛒</span>
+        Barang
+      </a>
+      <button class="bottom-nav-logout" onclick="logout()">
+        <span class="icon">🚪</span>
+        Logout
+      </button>
     </div>
+  </div>
 
-    <!-- ============================================================
+  <!-- ============================================================
          MAIN CONTENT
     ============================================================ -->
-    <div class="main">
+  <div class="main">
 
-      <!-- Mobile topbar (logo) -->
-      <div class="mobile-topbar">
-        <div class="logo-icon">
-          <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-            <rect width="12" height="12" rx="3" fill="white" opacity="0.9"/>
-            <rect x="16" width="12" height="12" rx="3" fill="white" opacity="0.6"/>
-            <rect y="16" width="12" height="12" rx="3" fill="white" opacity="0.6"/>
-            <rect x="16" y="16" width="12" height="12" rx="3" fill="white" opacity="0.4"/>
-          </svg>
-        </div>
-        <span class="logo-text">PAHLEVI STORE</span>
+    <!-- Mobile topbar (logo) -->
+    <div class="mobile-topbar">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+          <rect width="12" height="12" rx="3" fill="white" opacity="0.9" />
+          <rect x="16" width="12" height="12" rx="3" fill="white" opacity="0.6" />
+          <rect y="16" width="12" height="12" rx="3" fill="white" opacity="0.6" />
+          <rect x="16" y="16" width="12" height="12" rx="3" fill="white" opacity="0.4" />
+        </svg>
       </div>
+      <span class="logo-text">PAHLEVI STORE</span>
+    </div>
 
-      <!-- TOPBAR -->
-      <div class="topbar">
-        <div>
-          <h1>Daftar Barang</h1>
-          <p>Data produk dari database MySQL</p>
-        </div>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <h1>Daftar Barang</h1>
+        <p>Data produk dari database MySQL</p>
       </div>
+    </div>
 
-      <!-- SEARCH UTAMA -->
-      <div class="search-wrap">
-        <input type="text" id="search" placeholder="🔍 Cari barang..." />
+    <!-- SEARCH UTAMA & SCAN QR -->
+    <div class="search-wrap flex gap-3 flex-wrap items-center">
+      <div class="relative w-[280px] max-w-full">
+        <input type="text" id="search" placeholder="🔍 Cari barang..." class="w-full pr-12" />
+        <button onclick="bukaModalQrScan('search')" class="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-purple-600 hover:bg-purple-700 px-2 py-1 rounded text-xs transition font-semibold" title="Scan QR untuk Cari">
+          📷 QR
+        </button>
       </div>
+      <button onclick="bukaModalQrScan('tambah')" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition text-xs shadow-md">
+        📷 Scan QR (Tambah)
+      </button>
+    </div>
 
-      <!-- Tombol Buka Tab Baru untuk Print -->
-<button onclick="window.open('cetak.html', '_blank')"
-class="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition shadow-md">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-    Ekspor PDF
-</button>
+    <!-- Tombol Buka Tab Baru untuk Print -->
+    <button onclick="window.open('cetak.html', '_blank')"
+      class="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition shadow-md">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+        </path>
+      </svg>
+      Ekspor PDF
+    </button>
 
 
-      
+
     <!-- 2. WADAH DASHBOARD GRAFIK -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8 w-full">
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-orange-500"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-            Top 5 Barang Termahal
-        </h2>
-        
-        <!-- Kunci Container: relative h-72 (tinggi ~288px) -->
-        <div class="relative h-72 w-full">
-            <canvas id="myChart"></canvas>
-        </div>
-    </div>
-    
+      <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" class="text-orange-500">
+          <path d="M18 20V10" />
+          <path d="M12 20V4" />
+          <path d="M6 20v-6" />
+        </svg>
+        Top 5 Barang Termahal
+      </h2>
 
-      <!-- CARD -->
-      <div class="card">
-        <div class="card-header">
-          <h2>List Produk</h2>
-          <span class="badge">Aktif</span>
-        </div>
-
-        <!-- FORM TAMBAH / EDIT -->
-        <div class="form-section">
-          <h3 id="form-title">➕ Tambah Barang Baru</h3>
-          <input type="hidden" id="input-id" value="" />
-          <div class="form-row">
-            <div class="form-field" style="flex:1; min-width:140px;">
-              <label>Nama Barang</label>
-              <input type="text" id="input-nama" placeholder="Nama Barang" />
-            </div>
-            <div class="form-field" style="flex:1; min-width:120px;">
-              <label>Harga</label>
-              <input type="number" id="input-harga" placeholder="Harga (angka)" />
-            </div>
-            <div class="form-field" style="flex:1; min-width:160px;">
-              <label>Foto Barang</label>
-              <input type="file" id="input-gambar" accept="image/*" />
-            </div>
-            <div style="display:flex; gap:8px; padding-bottom:1px;">
-              <button id="btn-simpan" class="btn-simpan">💾 Simpan</button>
-              <button id="btn-batal" class="btn-batal hidden">✖ Batal</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Gambar</th>
-                <th>Nama Barang</th>
-                <th>Harga</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tabel-barang" class="text-gray-700 divide-y divide-gray-200"></tbody>
-          </table>
-        </div>
-
-        <!-- PAGINATION BAR — di dalam card, tepat di bawah tabel -->
-        <div class="pagination-bar">
-          <span id="info-halaman">Halaman 1 dari 1 (Total: 0 Data)</span>
-          <div style="display:flex; gap:8px;">
-            <button id="btn-prev" class="btn-page btn-prev-style" onclick="gantiHalaman(-1)" disabled>← Mundur</button>
-            <button id="btn-next" class="btn-page btn-next-style" onclick="gantiHalaman(1)" disabled>Lanjut →</button>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- FOOTER -->
-      <div class="footer-bar">
-        Total Barang: <span id="total-barang">0</span>
+      <!-- Kunci Container: relative h-72 (tinggi ~288px) -->
+      <div class="relative h-72 w-full">
+        <canvas id="myChart"></canvas>
       </div>
     </div>
 
-    <script src="app.js"></script>
-  </body>
+
+    <!-- CARD -->
+    <div class="card">
+      <div class="card-header">
+        <h2>List Produk</h2>
+        <span class="badge">Aktif</span>
+      </div>
+
+      <!-- FORM TAMBAH / EDIT -->
+      <div class="form-section">
+        <h3 id="form-title">➕ Tambah Barang Baru</h3>
+        <input type="hidden" id="input-id" value="" />
+        <div class="form-row">
+          <div class="form-field" style="flex:1; min-width:140px;">
+            <label>Nama Barang</label>
+            <input type="text" id="input-nama" placeholder="Nama Barang" />
+          </div>
+          <div class="form-field" style="flex:1; min-width:120px;">
+            <label>Harga</label>
+            <input type="number" id="input-harga" placeholder="Harga (angka)" />
+          </div>
+          <div class="form-field" style="flex:1; min-width:160px;">
+            <label>Foto Barang</label>
+            <input type="file" id="input-gambar" accept="image/*" />
+          </div>
+          
+          <!-- Field Kode QR (dengan scanner kecil inline) -->
+          <div class="form-field" style="flex:1; min-width:160px;">
+            <div class="flex justify-between items-center mb-1">
+              <label>Kode QR / Barcode</label>
+              <button type="button" onclick="toggleFormScanner()" class="text-[10px] bg-purple-600 hover:bg-purple-700 text-white px-2 py-0.5 rounded transition font-medium">📷 Scan QR</button>
+            </div>
+            <div id="form-reader" class="hidden mb-2 border border-gray-200 rounded p-1 bg-white" style="width: 100%; max-width: 280px;"></div>
+            <input type="text" id="form-kode-qr" placeholder="Ketik/scan QR" />
+          </div>
+
+          <!-- Field GPS -->
+          <div class="form-field" style="flex:1.5; min-width:240px;">
+            <div class="flex justify-between items-center mb-1">
+              <label>Titik Lokasi Gudang</label>
+              <button type="button" id="btn-lacak-gps" onclick="dapatkanLokasi()" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded transition font-medium">📍 Lacak GPS</button>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="form-latitude" placeholder="Latitude" readonly style="background-color: #f3f4f6;" />
+              <input type="text" id="form-longitude" placeholder="Longitude" readonly style="background-color: #f3f4f6;" />
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; padding-bottom:1px;">
+            <button id="btn-simpan" class="btn-simpan">💾 Simpan</button>
+            <button id="btn-batal" class="btn-batal hidden">✖ Batal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Gambar</th>
+              <th>Nama Barang</th>
+              <th>Harga</th>
+              <th>Lokasi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-barang" class="text-gray-700 divide-y divide-gray-200"></tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION BAR — di dalam card, tepat di bawah tabel -->
+      <div class="pagination-bar">
+        <span id="info-halaman">Halaman 1 dari 1 (Total: 0 Data)</span>
+        <div style="display:flex; gap:8px;">
+          <button id="btn-prev" class="btn-page btn-prev-style" onclick="gantiHalaman(-1)" disabled>← Mundur</button>
+          <button id="btn-next" class="btn-page btn-next-style" onclick="gantiHalaman(1)" disabled>Lanjut →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-bar">
+      Total Barang: <span id="total-barang">0</span>
+    </div>
+  </div>
+
+  <!-- MODAL QR SCANNER -->
+  <div id="modal-qr-scan" class="modal-backdrop">
+    <div class="modal-qr">
+      <div class="modal-qr-header">
+        <h3 id="qr-modal-title">QR Scanner</h3>
+        <button onclick="tutupModalQrScan()">✕</button>
+      </div>
+      <div class="modal-qr-body">
+        <p id="qr-modal-hint"></p>
+
+        <!-- Area kamera -->
+        <div id="qr-reader-main"></div>
+
+        <!-- Kotak status -->
+        <div id="qr-status-box" style="display:none;" class="flex flex-col gap-3">
+          <div class="text-center font-mono text-sm bg-gray-100 p-2 rounded border break-all">
+            Scanned: <span id="qr-scanned-text" class="font-bold"></span>
+          </div>
+
+          <!-- State 1: Sedang cek API -->
+          <div id="qr-state-loading" style="display:none;" class="items-center justify-content-center gap-2 p-4 text-gray-600 justify-center">
+            <svg class="animate-spin h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Memeriksa database...</span>
+          </div>
+
+          <!-- State 2: Barang DITEMUKAN (kartu hijau) -->
+          <div id="qr-state-found" style="display:none;" class="flex flex-col gap-2">
+            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg p-3 text-sm">
+              <div class="font-bold mb-1">🎉 Barang Ditemukan!</div>
+              <div class="grid grid-cols-[80px_1fr] gap-x-1">
+                <span class="text-gray-500">Nama:</span>
+                <span id="qr-found-nama" class="font-semibold text-gray-900"></span>
+                <span class="text-gray-500">Harga:</span>
+                <span id="qr-found-harga" class="font-semibold text-orange-600"></span>
+              </div>
+            </div>
+            <button onclick="eksekusiQrFound()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-sm transition">
+              🔍 Tampilkan di Tabel
+            </button>
+          </div>
+
+          <!-- State 3: Barang BELUM ADA (kartu kuning) -->
+          <div id="qr-state-notfound" style="display:none;" class="flex flex-col gap-2">
+            <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm">
+              <div class="font-bold mb-1">📦 Belum Terdaftar</div>
+              <div>Kode QR ini belum terdaftar di database. Ingin menambahkannya sebagai barang baru?</div>
+            </div>
+            <button onclick="eksekusiQrTambah()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-lg text-sm transition">
+              ➕ Tambah Barang Baru
+            </button>
+          </div>
+
+          <button onclick="resetQrScanner()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg text-xs transition mt-2">
+            ↩ Scan Ulang
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
 </html>

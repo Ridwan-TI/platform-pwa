@@ -1,5 +1,5 @@
 {
-  "name": "App Toko",
+  "name": "Aplikasi Toko Keren",
   "short_name": "Toko",
   "start_url": "./index.html",
   "scope": "./",
@@ -21,3 +21,7 @@
     }
   ]
 }
+
+
+
+

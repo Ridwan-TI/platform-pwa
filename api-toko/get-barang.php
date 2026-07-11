@@ -60,6 +60,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
+if (isset($_GET['kode_qr'])) {
+    $kode_qr = mysqli_real_escape_string($koneksi, trim($_GET['kode_qr']));
+    $query = mysqli_query($koneksi, "SELECT * FROM barang WHERE kode_qr = '$kode_qr' LIMIT 1");
+    if ($query && mysqli_num_rows($query) > 0) {
+        $barang = mysqli_fetch_assoc($query);
+        echo json_encode([
+            "status"  => "success",
+            "message" => "Barang ditemukan.",
+            "data"    => $barang
+        ]);
+    } else {
+        echo json_encode([
+            "status"  => "not_found",
+            "message" => "Belum ada di database.",
+            "data"    => null
+        ]);
+    }
+    exit();
+}
+
 $query  = mysqli_query($koneksi, "SELECT * FROM barang ORDER BY ID DESC");
 $data   = [];
 
